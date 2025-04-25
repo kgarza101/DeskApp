@@ -1,198 +1,212 @@
-from tkinter import *
 import sqlite3 
+from tkinter import *
+from tkinter import messagebox
+import login_system
 
-root = Tk()
-root.title('To-Do List')
+class TaskManagerApp:
+    def __init__(self, root, is_admin = False):
+        self.root = root 
+        self.is_admin = is_admin
+        self.root.title('To-Do List - Admin Mode' if is_admin else 'To-Do List - User Mode')
+        
+        self.dataConnector = sqlite3.connect('EntryInfo.db')
+        self.cursor = self.dataConnector.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS info 
+                            (name TEXT, due_date TEXT, descrip TEXT, status TEXT, group_mem TEXT)''')
+        self.dataConnector.commit()
+        self.create_widgets()
+        self.query_info()
+        
+        if not self.is_admin:
+            self.disable_admin_features()
+            
+    def create_widgets(self):
+        self.name = Entry(self.root, width = 50)
+        self.due_date = Entry(self.root, width = 50)
+        self.descrip = Entry(self.root, width = 50)
+        self.status = Entry(self.root, width = 50)
+        self.group = Entry(self.root, width = 50)
+        
+        self.name_label = Label(self.root, text = "Name")
+        self.date_label = Label(self.root, text = "Due Date")
+        self.descrip_label = Label(self.root, text = "Description")
+        self.status_label = Label(self.root, text = "Status")
+        self.group_label = Label(self.root, text = "Group Members")
+        
+        self.submit_button = Button(self.root, text = "Add Data", command = self.submit)
+        self.update_button = Button(self.root, text = "Update Data", command = self.update_record, state = DISABLED)
+        self.delete_button = Button(self.root, text = "Delete Data", command = self.delete_record, state=DISABLED)
+        self.select_button = Button(self.root, text = "Select Task", command = self.select_task)
+        
+        # Table to display records
+        self.listbox = Listbox(self.root, width = 75, height = 10)
+        self.listbox.bind("<<ListboxSelect>>", self.select_record)
+        self.scrollbar = Scrollbar(self.root, orient = VERTICAL, command = self.listbox.yview)
+        self.listbox.config(yscrollcommand = self.scrollbar.set)   
+        
+        # Layout
+        self.name.grid(row = 0, column = 1, padx = 5, pady = 2)
+        self.due_date.grid(row = 1, column = 1, padx = 5, pady = 2)
+        self.descrip.grid(row = 2, column = 1, padx = 5, pady = 2)
+        self.status.grid(row = 3, column = 1, padx = 5, pady = 2)
+        self.group.grid(row = 4, column = 1, padx = 5, pady = 2)
 
-# Create the connector
-dataConnector = sqlite3.connect('EntryInfo.db')
-
-# Create Cursor
-cursor = dataConnector.cursor()
-
-
-# Functions
-def submit():
-    dataConnector = sqlite3.connect('EntryInfo.db')
-    cursor = dataConnector.cursor()
-
-    # Varibles in sqlite file
-    cursor.execute("INSERT INTO info VALUES(:name, :due_date, :descrip, :status, :group_mem)",
-        {
-            'name': name.get(),
-            'due_date': due_date.get(),
-            'descrip': descrip.get(),
-            'status': status.get(), 
-            'group_mem': group.get()
-        }
-    )
-    dataConnector.commit()
-    dataConnector.close()
-
-    name.delete(0, END)
-    due_date.delete(0, END)
-    descrip.delete(0, END)
-    status.delete(0, END)
-    group.delete(0, END)
+        self.name_label.grid(row = 0, column = 0, padx = 5, pady = 2)
+        self.date_label.grid(row = 1, column = 0, padx = 5, pady = 2)
+        self.descrip_label.grid(row = 2, column = 0, padx = 5, pady = 2)
+        self.status_label.grid(row = 3, column = 0, padx = 5, pady = 2)
+        self.group_label.grid(row = 4, column = 0, padx = 5, pady = 2)  
+        
+        if self.is_admin:
+            self.submit_button.grid(row = 5, column = 0, padx = 5, pady = 5)
+            self.update_button.grid(row = 7, column = 0, padx = 5, pady = 5)
+            self.delete_button.grid(row = 8, column = 0, padx = 5, pady = 5)
+        
+        self.select_button.grid(row = 9, column = 0, padx = 5, pady = 5)
+        self.listbox.grid(row = 6, column = 0, columnspan = 2)
+        self.scrollbar.grid(row = 6, column = 2, sticky = 'ns')
     
-    # Refreshes the list
-    query_info()
+    def disable_admin_features(self):
+        self.name.config(state = DISABLED)
+        self.due_date.config(state = DISABLED)
+        self.descrip.config(state = DISABLED)
+        self.status.config(state = DISABLED)
+        self.group.config(state = DISABLED)
+        self.submit_button.config(state = DISABLED)        
+    
+    def submit(self):
+        self.dataConnector = sqlite3.connect('EntryInfo.db')
+        self.cursor = self.dataConnector.cursor()
 
+        self.cursor.execute("INSERT INTO info VALUES(:name, :due_date, :descrip, :status, :group_mem)",
+            {
+                'name': self.name.get(),
+                'due_date': self.due_date.get(),
+                'descrip': self.descrip.get(),
+                'status': self.status.get(), 
+                'group_mem': self.group.get()
+            }
+        )
+        self.dataConnector.commit()
+        self.dataConnector.close()
 
-def query_info():
-    dataConnector = sqlite3.connect('EntryInfo.db')
-    cursor = dataConnector.cursor()
+        self.name.delete(0, END)
+        self.due_date.delete(0, END)
+        self.descrip.delete(0, END)
+        self.status.delete(0, END)
+        self.group.delete(0, END)
+        
+        self.query_info()
+    
+    def query_info(self):
+        self.dataConnector = sqlite3.connect('EntryInfo.db')
+        self.cursor = self.dataConnector.cursor()
 
-    cursor.execute("SELECT *, oid FROM info")
-    records = cursor.fetchall()
+        self.cursor.execute("SELECT *, oid FROM info")
+        records = self.cursor.fetchall()
 
-    listbox.delete(0, END)
+        self.listbox.delete(0, END)
 
-    # Displays the records in order, record 5 is the ID number
-    for record in records: 
-        listbox.insert(END, f"ID {record[5]} | {record[0]} - {record[1]} - {record[2]} - {record[3]} - {record[4]}")
+        for record in records: 
+            self.listbox.insert(END, f"ID {record[5]} | {record[0]} - {record[1]} - {record[2]} - {record[3]} - {record[4]}")
 
-dataConnector.close()
+        self.dataConnector.close()
+    
+    def select_record(self, event):
+        try:
+            selected = self.listbox.get(self.listbox.curselection())
+            record_id = selected.split(" ")[1]
 
+            self.dataConnector = sqlite3.connect('EntryInfo.db')
+            self.cursor = self.dataConnector.cursor()
 
-# User can select the record from the table
-def select_record(event):
-    try:
-        selected = listbox.get(listbox.curselection())
-        record_id = selected.split(" ")[1]
+            self.cursor.execute("SELECT * FROM info WHERE oid=?", (record_id,))
+            record = self.cursor.fetchone()
 
-        dataConnector = sqlite3.connect('EntryInfo.db')
-        cursor = dataConnector.cursor()
+            self.dataConnector.close()
 
-        cursor.execute("SELECT * FROM info WHERE oid=?", (record_id,))
-        record = cursor.fetchone()
+            self.name.delete(0, END)
+            self.due_date.delete(0, END)
+            self.descrip.delete(0, END)
+            self.status.delete(0, END)
+            self.group.delete(0, END)
 
-        dataConnector.close()
+            self.name.insert(0, record[0])
+            self.due_date.insert(0, record[1])
+            self.descrip.insert(0, record[2])
+            self.status.insert(0, record[3])
+            self.group.insert(0, record[4])
 
-        name.delete(0, END)
-        due_date.delete(0, END)
-        descrip.delete(0, END)
-        status.delete(0, END)
-        group.delete(0, END)
+            if self.is_admin:
+                self.update_button.config(state=NORMAL)
+                self.delete_button.config(state=NORMAL)
+                self.update_button.record_id = record_id
+        except:
+            pass
+        
+    def update_record(self):
+        self.dataConnector = sqlite3.connect('EntryInfo.db')
+        self.cursor = self.dataConnector.cursor()
+        
+        self.cursor.execute("""UPDATE info SET 
+            name = :name,
+            due_date = :due_date,
+            descrip = :descrip,
+            status = :status,
+            group_mem = :group_mem
+            WHERE oid = :oid""",
+            {
+                'name': self.name.get(),
+                'due_date': self.due_date.get(),
+                'descrip': self.descrip.get(),
+                'status': self.status.get(), 
+                'group_mem': self.group.get(),
+                'oid': self.update_button.record_id
+            }
+        )
+        
+        self.dataConnector.commit()
+        self.dataConnector.close()
+        self.query_info()
+        
+        self.name.delete(0, END)
+        self.due_date.delete(0, END)
+        self.descrip.delete(0, END)
+        self.status.delete(0, END)
+        self.group.delete(0, END)
+        
+        self.update_button.config(state = DISABLED)
+        self.delete_button.config(state = DISABLED)
+        
+    def delete_record(self):
+        # Create the connector
+        self.dataConnector = sqlite3.connect('EntryInfo.db')
+        # Create Cursor
+        self.cursor = self.dataConnector.cursor()
+       
+        self.cursor.execute("DELETE FROM info WHERE oid=?", (self.update_button.record_id,))
+        self.dataConnector.commit()
+        self.dataConnector.close()
 
-        name.insert(0, record[0])
-        due_date.insert(0, record[1])
-        descrip.insert(0, record[2])
-        status.insert(0, record[3])
-        group.insert(0, record[4])
+        self.query_info()
 
-        # Enables the buttons and stores ID
-        update_button.config(state = NORMAL)
-        delete_button.config(state = NORMAL)
-        update_button.record_id = record_id  
-    except:
-        pass
+        self.name.delete(0, END)
+        self.due_date.delete(0, END)
+        self.descrip.delete(0, END)
+        self.status.delete(0, END)
+        self.group.delete(0, END)
 
-
-# Allows the user to update previous record    
-def update_record():
-    dataConnector = sqlite3.connect('EntryInfo.db')
-    cursor = dataConnector.cursor()
-
-    cursor.execute("""UPDATE info SET 
-        name = :name,
-        due_date = :due_date,
-        descrip = :descrip,
-        status = :status,
-        group_mem = :group_mem
-        WHERE oid = :oid""",
-        {
-            'name': name.get(),
-            'due_date': due_date.get(),
-            'descrip': descrip.get(),
-            'status': status.get(), 
-            'group_mem': group.get(),
-            'oid': update_button.record_id
-        }
-    )
-
-    dataConnector.commit()
-    dataConnector.close()
-
-    query_info()
-
-    name.delete(0, END)
-    due_date.delete(0, END)
-    descrip.delete(0, END)
-    status.delete(0, END)
-    group.delete(0, END)
-
-    update_button.config(state = DISABLED)
-    delete_button.config(state = DISABLED)
-
-
-# Allows the user to delete record from the table    
-def delete_record():
-    dataConnector = sqlite3.connect('EntryInfo.db')
-    cursor = dataConnector.cursor()
-
-    cursor.execute("DELETE FROM info WHERE oid=?", (update_button.record_id,))
-    dataConnector.commit()
-    dataConnector.close()
-
-    # Refresh the list
-    query_info()
-
-    # Clear entry fields
-    name.delete(0, END)
-    due_date.delete(0, END)
-    descrip.delete(0, END)
-    status.delete(0, END)
-    group.delete(0, END)
-
-    update_button.config(state = DISABLED)
-    delete_button.config(state = DISABLED)
-
-
-# GUI section
-# Widgets
-name = Entry(root, width = 50)
-due_date = Entry(root, width = 50)
-descrip = Entry(root, width = 50)
-status = Entry(root, width = 50)
-group = Entry(root, width = 50)
-
-name_label = Label(root, text = "Name")
-date_label = Label(root, text = "Due Date")
-descrip_label = Label(root, text = "Description")
-status_label = Label(root, text = "Status")
-group_label = Label(root, text = "Group Members")
-
-submit_button = Button(root, text="Add Data", command = submit)
-update_button = Button(root, text="Update Data", command = update_record, state = DISABLED)
-delete_button = Button(root, text="Delete Data", command = delete_record, state = DISABLED)
-
-# Table to display records
-listbox = Listbox(root, width = 75, height = 10)
-listbox.bind("<<ListboxSelect>>", select_record)
-scrollbar = Scrollbar(root, orient = VERTICAL, command = listbox.yview)
-listbox.config(yscrollcommand = scrollbar.set)
-
-# Layout
-name.grid(row = 0, column = 1)
-due_date.grid(row = 1, column = 1)
-descrip.grid(row = 2, column = 1)
-status.grid(row = 3, column = 1)
-group.grid(row = 4, column = 1)
-
-name_label.grid(row = 0, column = 0)
-date_label.grid(row = 1, column = 0)
-descrip_label.grid(row = 2, column = 0)
-status_label.grid(row = 3, column = 0)
-group_label.grid(row = 4, column = 0)
-
-submit_button.grid(row = 5, column = 0)
-update_button.grid(row = 7, column = 0)
-delete_button.grid(row = 8, column = 0)
-
-listbox.grid(row = 6, column = 0, columnspan = 2)
-scrollbar.grid(row = 6, column = 2, sticky = 'ns')
-
-query_info()
-
-root.mainloop()
+        self.update_button.config(state = DISABLED)
+        self.delete_button.config(state = DISABLED)    
+        
+    def select_task(self):
+        try:
+            selected = self.listbox.get(self.listbox.curselection())
+            messagebox.showinfo("Task Selected", f"You've selected: {selected}")
+        except:
+            messagebox.showerror("Error", "Please select a task first.")
+            
+if __name__ == "__main__":
+    root = Tk()
+    app = TaskManagerApp(root, is_admin = True)
+    root.mainloop()
