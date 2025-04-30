@@ -7,6 +7,7 @@ class TaskManagerApp:
     def __init__(self, root, is_admin = False):
         self.root = root 
         self.is_admin = is_admin
+        self.root.geometry("650x500")
         self.root.title('To-Do List - Admin Mode' if is_admin else 'To-Do List - User Mode')
         
         self.dataConnector = sqlite3.connect('EntryInfo.db')
@@ -27,6 +28,7 @@ class TaskManagerApp:
         self.status = Entry(self.root, width = 50)
         self.group = Entry(self.root, width = 50)
         
+        self.title_label = Label(root, text="Welcome to Your Task Assigner", fg="dark green", font=("Times New Roman", 25, "bold"))
         self.name_label = Label(self.root, text = "Name")
         self.date_label = Label(self.root, text = "Due Date")
         self.descrip_label = Label(self.root, text = "Description")
@@ -35,7 +37,7 @@ class TaskManagerApp:
         
         self.submit_button = Button(self.root, text = "Add Data", command = self.submit)
         self.update_button = Button(self.root, text = "Update Data", command = self.update_record, state = DISABLED)
-        self.delete_button = Button(self.root, text = "Delete Data", command = self.delete_record, state=DISABLED)
+        self.delete_button = Button(self.root, text = "Delete Data", foreground="snow", command = self.delete_record, state=DISABLED)
         self.select_button = Button(self.root, text = "Select Task", command = self.select_task)
         
         # Table to display records
@@ -44,27 +46,34 @@ class TaskManagerApp:
         self.scrollbar = Scrollbar(self.root, orient = VERTICAL, command = self.listbox.yview)
         self.listbox.config(yscrollcommand = self.scrollbar.set)   
         
-        # Layout
-        self.name.grid(row = 0, column = 1, padx = 5, pady = 2)
-        self.due_date.grid(row = 1, column = 1, padx = 5, pady = 2)
-        self.descrip.grid(row = 2, column = 1, padx = 5, pady = 2)
-        self.status.grid(row = 3, column = 1, padx = 5, pady = 2)
-        self.group.grid(row = 4, column = 1, padx = 5, pady = 2)
+        #Color
+        self.root.configure(background="lightblue")
+        self.title_label.config(background="lightblue")
+        #change button color to tell difference
+        #self.delete_button.config(background="red")
 
-        self.name_label.grid(row = 0, column = 0, padx = 5, pady = 2)
-        self.date_label.grid(row = 1, column = 0, padx = 5, pady = 2)
-        self.descrip_label.grid(row = 2, column = 0, padx = 5, pady = 2)
-        self.status_label.grid(row = 3, column = 0, padx = 5, pady = 2)
-        self.group_label.grid(row = 4, column = 0, padx = 5, pady = 2)  
+        # Layout
+        self.name.place(x=175, y=75)
+        self.due_date.place(x=175, y=100)
+        self.descrip.place(x=175, y=125)
+        self.status.place(x=175, y=150)
+        self.group.place(x=175, y=175)
+        self.title_label.place(x=50, y=0, width=550, relheight=0.1)
+
+        self.name_label.place(x=128, y=75)
+        self.date_label.place(x=112, y=100)
+        self.descrip_label.place(x=100, y=125)
+        self.status_label.place(x=128, y=150)
+        self.group_label.place(x=75, y=175)  
         
         if self.is_admin:
-            self.submit_button.grid(row = 5, column = 0, padx = 5, pady = 5)
-            self.update_button.grid(row = 7, column = 0, padx = 5, pady = 5)
-            self.delete_button.grid(row = 8, column = 0, padx = 5, pady = 5)
+            self.submit_button.place(x=450, y=205)
+            self.update_button.place(x=150, y=425)
+            self.delete_button.place(x=480, y=425)
         
-        self.select_button.grid(row = 9, column = 0, padx = 5, pady = 5)
-        self.listbox.grid(row = 6, column = 0, columnspan = 2)
-        self.scrollbar.grid(row = 6, column = 2, sticky = 'ns')
+        self.select_button.place(x=560, y=390)
+        self.listbox.place(x=150, y=250, width=375)
+        self.scrollbar.place(x=535, y=250, height=165)
     
     def disable_admin_features(self):
         self.name.config(state = DISABLED)

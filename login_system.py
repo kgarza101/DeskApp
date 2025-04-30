@@ -35,15 +35,20 @@ class LoginWindow:
         self.button_login = Button(master, text = "Login", command = self.login)
         self.button_signup = Button(master, text = "Sign up", command = self.open_signup)
         
-        self.label_username.grid(row = 0, column = 0, padx = 5, pady = 5)
-        self.label_password.grid(row = 1, column = 0, padx = 5, pady = 5)
+        self.label_username.place(x=30, y=25)#(row = 0, column = 0, padx = 5, pady = 5)
+        self.label_password.place(x=30, y=55)#(row = 1, column = 0, padx = 5, pady = 5)
         
-        self.entry_username.grid(row = 0, column = 1, padx = 5, pady = 5)
-        self.entry_password.grid(row = 1, column = 1, padx = 5, pady = 5)
+        self.entry_username.place(x=95, y=27)#(row = 0, column = 1, padx = 5, pady = 5)
+        self.entry_password.place(x=95, y=57)#(row = 1, column = 1, padx = 5, pady = 5)
         
-        self.button_login.grid(row = 2, column = 0, padx = 5, pady = 5)
-        self.button_signup.grid(row = 2, column = 1, padx = 5, pady = 5)
+        self.button_login.place(x=95, y=90)#(row = 2, column = 0, padx = 5, pady = 5)
+        self.button_signup.place(x=170, y=90)#(row = 2, column = 1, padx = 5, pady = 5)
         
+        #color
+        self.master.configure(background="pale green")
+        self.label_username.config(background="pale green")
+        self.label_password.config(background="pale green")
+
     def login(self):
         username = self.entry_username.get()
         password = self.entry_password.get()
