@@ -26,6 +26,7 @@ class LoginWindow:
         setup_user_db()
         
         # Widgets and Layout
+        self.text = Label(master, text = "Please log in or sign up", fg="gray12", font=("Times New Roman", 11))
         self.label_username = Label(master, text = "Username: ")
         self.label_password = Label(master, text = "Password: ")
         
@@ -35,19 +36,21 @@ class LoginWindow:
         self.button_login = Button(master, text = "Login", command = self.login)
         self.button_signup = Button(master, text = "Sign up", command = self.open_signup)
         
-        self.label_username.place(x=30, y=25)#(row = 0, column = 0, padx = 5, pady = 5)
-        self.label_password.place(x=30, y=55)#(row = 1, column = 0, padx = 5, pady = 5)
+        self.text.place(x=85, y=15)
+        self.label_username.place(x=30, y=45)#(row = 0, column = 0, padx = 5, pady = 5)
+        self.label_password.place(x=30, y=75)#(row = 1, column = 0, padx = 5, pady = 5)
         
-        self.entry_username.place(x=95, y=27)#(row = 0, column = 1, padx = 5, pady = 5)
-        self.entry_password.place(x=95, y=57)#(row = 1, column = 1, padx = 5, pady = 5)
+        self.entry_username.place(x=95, y=45)#(row = 0, column = 1, padx = 5, pady = 5)
+        self.entry_password.place(x=95, y=77)#(row = 1, column = 1, padx = 5, pady = 5)
         
-        self.button_login.place(x=95, y=90)#(row = 2, column = 0, padx = 5, pady = 5)
-        self.button_signup.place(x=170, y=90)#(row = 2, column = 1, padx = 5, pady = 5)
+        self.button_login.place(x=170, y=110)#(row = 2, column = 0, padx = 5, pady = 5)
+        self.button_signup.place(x=95, y=110)#(row = 2, column = 1, padx = 5, pady = 5)
         
         #color
         self.master.configure(background="pale green")
         self.label_username.config(background="pale green")
         self.label_password.config(background="pale green")
+        self.text.config(background="pale green")
 
     def login(self):
         username = self.entry_username.get()

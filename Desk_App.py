@@ -28,7 +28,7 @@ class TaskManagerApp:
         self.status = Entry(self.root, width = 50)
         self.group = Entry(self.root, width = 50)
         
-        self.title_label = Label(root, text="Welcome to Your Task Assigner", fg="dark green", font=("Times New Roman", 25, "bold"))
+        self.title_label = Label(self.root, text="Welcome to Your Task Assigner", fg="dark green", font=("Times New Roman", 25, "bold"))
         self.name_label = Label(self.root, text = "Name")
         self.date_label = Label(self.root, text = "Due Date")
         self.descrip_label = Label(self.root, text = "Description")
@@ -79,7 +79,7 @@ class TaskManagerApp:
         self.name.config(state = DISABLED)
         self.due_date.config(state = DISABLED)
         self.descrip.config(state = DISABLED)
-        self.status.config(state = DISABLED)
+        #self.status.config(state = DISABLED) #Note: user can change status only
         self.group.config(state = DISABLED)
         self.submit_button.config(state = DISABLED)        
     
@@ -117,7 +117,7 @@ class TaskManagerApp:
         self.listbox.delete(0, END)
 
         for record in records: 
-            self.listbox.insert(END, f"ID {record[5]} | {record[0]} - {record[1]} - {record[2]} - {record[3]} - {record[4]}")
+            self.listbox.insert(END, f"ID {record[5]} | {record[0]} | {record[1]} | {record[2]} | {record[3]} | {record[4]}")
 
         self.dataConnector.close()
     
