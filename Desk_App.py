@@ -34,13 +34,26 @@ class TaskManagerApp:
         self.descrip_label = Label(self.root, text = "Description")
         self.status_label = Label(self.root, text = "Status")
         self.group_label = Label(self.root, text = "Group Members")
+        self.text_label = Label(self.root, text = "Add or Update a Task", font = ("Times New Roman", 12))
         
         self.submit_button = Button(self.root, text = "Add Data", command = self.submit)
         self.update_button = Button(self.root, text = "Update Data", command = self.update_record)
-        self.delete_button = Button(self.root, text = "Delete Data", foreground="snow", command = self.delete_record, state=DISABLED)
-        self.select_button = Button(self.root, text = "Select Task", command = self.select_task)
+        self.delete_button = Button(self.root, text = "Delete Data", command = self.delete_record, state=DISABLED)
+        self.select_button = Button(self.root, text = "Select Task", fg="snow", command = self.select_task)
         self.logout_button = Button(self.root, text="Logout", command=self.logout)
         
+        #Event handlers
+        self.delete_button.bind("<Enter>", lambda event: event.widget.config(bg="indianred3", fg="snow"))
+        self.delete_button.bind("<Leave>", lambda event: event.widget.config(bg="indianred1", fg="black"))
+        self.submit_button.bind("<Enter>", lambda event: event.widget.config(bg="darkolivegreen3", fg="snow"))
+        self.submit_button.bind("<Leave>", lambda event: event.widget.config(bg="darkolivegreen2", fg="black"))
+        self.update_button.bind("<Enter>", lambda event: event.widget.config(bg="orange2", fg="snow"))
+        self.update_button.bind("<Leave>", lambda event: event.widget.config(bg="orange1", fg="black"))
+        self.select_button.bind("<Enter>", lambda event: event.widget.config(bg="lightsteelblue4", fg="snow"))
+        self.select_button.bind("<Leave>", lambda event: event.widget.config(bg="lightsteelblue3", fg="black"))
+        self.logout_button.bind("<Enter>", lambda event: event.widget.config(bg="gray78", fg="snow"))
+        self.logout_button.bind("<Leave>", lambda event: event.widget.config(bg="gray89", fg="black"))
+
         # Table to display records
         self.listbox = Listbox(self.root, width = 75, height = 10)
         self.listbox.bind("<<ListboxSelect>>", self.select_record)
@@ -50,32 +63,38 @@ class TaskManagerApp:
         #Color
         self.root.configure(background="lightblue")
         self.title_label.config(background="lightblue")
+        self.text_label.config(background="lightblue")
         #change button color to tell difference
-        #self.delete_button.config(background="red")
+        self.delete_button.config(background="indianred1")
+        self.submit_button.config(background="darkolivegreen2")
+        self.update_button.config(background="orange1")
+        self.select_button.config(background="lightsteelblue3")
+        self.logout_button.config(background="gray89")
 
         # Layout
-        self.name.place(x=175, y=75)
-        self.due_date.place(x=175, y=100)
-        self.descrip.place(x=175, y=125)
-        self.status.place(x=175, y=150)
-        self.group.place(x=175, y=175)
+        self.name.place(x=175, y=100)
+        self.due_date.place(x=175, y=125)
+        self.descrip.place(x=175, y=150)
+        self.status.place(x=175, y=175)
+        self.group.place(x=175, y=200)
         self.title_label.place(x=50, y=0, width=550, relheight=0.1)
+        self.text_label.place(x=267, y=65)
 
-        self.name_label.place(x=128, y=75)
-        self.date_label.place(x=112, y=100)
-        self.descrip_label.place(x=100, y=125)
-        self.status_label.place(x=128, y=150)
-        self.group_label.place(x=75, y=175)  
+        self.name_label.place(x=128, y=100)
+        self.date_label.place(x=112, y=125)
+        self.descrip_label.place(x=100, y=150)
+        self.status_label.place(x=128, y=175)
+        self.group_label.place(x=75, y=200)  
         
         if self.is_admin:
-            self.submit_button.place(x=450, y=205)
-            self.delete_button.place(x=480, y=425)
+            self.submit_button.place(x=495, y=235)
+            self.delete_button.place(x=480, y=450)
         
-        self.update_button.place(x=150, y=425)
-        self.select_button.place(x=560, y=390)
-        self.logout_button.place(x=560, y=425)
-        self.listbox.place(x=150, y=250, width=375)
-        self.scrollbar.place(x=535, y=250, height=165)
+        self.update_button.place(x=150, y=450)
+        self.select_button.place(x=560, y=415)
+        self.logout_button.place(x=560, y=50)
+        self.listbox.place(x=150, y=275, width=375)
+        self.scrollbar.place(x=535, y=275, height=165)
 
     def logout(self):
         self.root.destroy()

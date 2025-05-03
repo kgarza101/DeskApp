@@ -81,11 +81,14 @@ class SignupWindow:
     def __init__(self, master):
         self.master = master
         master.title("Sign Up")
+        master.geometry("300x190")
+
         
         # Widgets and Layout
         self.label_username = Label(master, text = "New Username: ")
         self.label_password = Label(master, text = "New Password: ")
         self.label_confirm = Label(master, text = "Confirm Password: ")
+        self.text_label = Label(master, text= "Please Sign-Up to Gain Access", font=("Times New Roman", 10))
         
         self.entry_username = Entry(master)
         self.entry_password = Entry(master, show = "*")
@@ -93,15 +96,23 @@ class SignupWindow:
         
         self.button_signup = Button(master, text = "Create Account", command = self.signup)
         
-        self.label_username.grid(row = 0, column = 0, padx = 5, pady = 2)
-        self.label_password.grid(row = 1, column = 0, padx = 5, pady = 2)
-        self.label_confirm.grid(row = 2, column = 0, padx = 5, pady = 2)
+        self.text_label.place(x=60, y=12)
+        self.label_username.place(x=35, y=50)
+        self.label_password.place(x=35, y=80)
+        self.label_confirm.place(x=35, y=110)
         
-        self.entry_username.grid(row = 0, column = 1, padx = 5, pady = 2)
-        self.entry_password.grid(row = 1, column = 1, padx = 5, pady = 2)
-        self.entry_confirm.grid(row = 2, column = 1, padx = 5, pady = 2)
+        self.entry_username.place(x=150, y=50)
+        self.entry_password.place(x=150, y=80)
+        self.entry_confirm.place(x=150, y=110)
         
-        self.button_signup.grid(row = 3, columnspan = 2, pady = 5)  
+        self.button_signup.place(x=115, y=150)  
+
+        #Color
+        self.master.configure(background="lightsteelblue1")
+        self.text_label.config(background="lightsteelblue1")
+        self.label_confirm.config(background="lightsteelblue1")
+        self.label_password.config(background="lightsteelblue1")
+        self.label_username.config(background="lightsteelblue1")
         
     def signup(self):
         username = self.entry_username.get()
