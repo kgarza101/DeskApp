@@ -36,9 +36,10 @@ class TaskManagerApp:
         self.group_label = Label(self.root, text = "Group Members")
         
         self.submit_button = Button(self.root, text = "Add Data", command = self.submit)
-        self.update_button = Button(self.root, text = "Update Data", command = self.update_record, state = DISABLED)
+        self.update_button = Button(self.root, text = "Update Data", command = self.update_record)
         self.delete_button = Button(self.root, text = "Delete Data", foreground="snow", command = self.delete_record, state=DISABLED)
         self.select_button = Button(self.root, text = "Select Task", command = self.select_task)
+        self.logout_button = Button(self.root, text="Logout", command=self.logout)
         
         # Table to display records
         self.listbox = Listbox(self.root, width = 75, height = 10)
@@ -68,20 +69,33 @@ class TaskManagerApp:
         
         if self.is_admin:
             self.submit_button.place(x=450, y=205)
-            self.update_button.place(x=150, y=425)
             self.delete_button.place(x=480, y=425)
         
+        self.update_button.place(x=150, y=425)
         self.select_button.place(x=560, y=390)
+        self.logout_button.place(x=560, y=425)
         self.listbox.place(x=150, y=250, width=375)
         self.scrollbar.place(x=535, y=250, height=165)
+
+    def logout(self):
+        self.root.destroy()
+        login_root = Tk()
+        login_app = login_system.LoginWindow(login_root)
+        login_root.mainloop()
     
     def disable_admin_features(self):
+        # Disable name, due date, and description fields for guests
         self.name.config(state = DISABLED)
         self.due_date.config(state = DISABLED)
         self.descrip.config(state = DISABLED)
-        #self.status.config(state = DISABLED) #Note: user can change status only
-        self.group.config(state = DISABLED)
+        
+        # Disable submit and delete buttons for guests
         self.submit_button.config(state = DISABLED)        
+        self.delete_button.config(state = DISABLED)
+        
+        # Keep status and group members fields editable
+        self.status.config(state = NORMAL)
+        self.group.config(state = NORMAL)
     
     def submit(self):
         self.dataConnector = sqlite3.connect('EntryInfo.db')
@@ -146,10 +160,18 @@ class TaskManagerApp:
             self.status.insert(0, record[3])
             self.group.insert(0, record[4])
 
+            self.update_button.config(state=NORMAL)
             if self.is_admin:
-                self.update_button.config(state=NORMAL)
                 self.delete_button.config(state=NORMAL)
-                self.update_button.record_id = record_id
+            self.update_button.record_id = record_id
+            
+            # For guests, disable name, due date, and description fields after selection
+            if not self.is_admin:
+                self.name.config(state = DISABLED)
+                self.due_date.config(state = DISABLED)
+                self.descrip.config(state = DISABLED)
+                self.status.config(state = NORMAL)
+                self.group.config(state = NORMAL)
         except:
             pass
         
@@ -157,22 +179,36 @@ class TaskManagerApp:
         self.dataConnector = sqlite3.connect('EntryInfo.db')
         self.cursor = self.dataConnector.cursor()
         
-        self.cursor.execute("""UPDATE info SET 
-            name = :name,
-            due_date = :due_date,
-            descrip = :descrip,
-            status = :status,
-            group_mem = :group_mem
-            WHERE oid = :oid""",
-            {
-                'name': self.name.get(),
-                'due_date': self.due_date.get(),
-                'descrip': self.descrip.get(),
-                'status': self.status.get(), 
-                'group_mem': self.group.get(),
-                'oid': self.update_button.record_id
-            }
-        )
+        # For guests, only update status and group members
+        if not self.is_admin:
+            self.cursor.execute("""UPDATE info SET 
+                status = :status,
+                group_mem = :group_mem
+                WHERE oid = :oid""",
+                {
+                    'status': self.status.get(), 
+                    'group_mem': self.group.get(),
+                    'oid': self.update_button.record_id
+                }
+            )
+        else:
+            # For admins, update all fields
+            self.cursor.execute("""UPDATE info SET 
+                name = :name,
+                due_date = :due_date,
+                descrip = :descrip,
+                status = :status,
+                group_mem = :group_mem
+                WHERE oid = :oid""",
+                {
+                    'name': self.name.get(),
+                    'due_date': self.due_date.get(),
+                    'descrip': self.descrip.get(),
+                    'status': self.status.get(), 
+                    'group_mem': self.group.get(),
+                    'oid': self.update_button.record_id
+                }
+            )
         
         self.dataConnector.commit()
         self.dataConnector.close()
@@ -185,7 +221,8 @@ class TaskManagerApp:
         self.group.delete(0, END)
         
         self.update_button.config(state = DISABLED)
-        self.delete_button.config(state = DISABLED)
+        if self.is_admin:
+            self.delete_button.config(state = DISABLED)
         
     def delete_record(self):
         # Create the connector
