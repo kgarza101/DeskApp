@@ -81,14 +81,24 @@ class SignupWindow:
     def __init__(self, master):
         self.master = master
         master.title("Sign Up")
-        master.geometry("300x190")
+        master.geometry("370x200")
 
         
         # Widgets and Layout
         self.label_username = Label(master, text = "New Username: ")
         self.label_password = Label(master, text = "New Password: ")
         self.label_confirm = Label(master, text = "Confirm Password: ")
-        self.text_label = Label(master, text= "Please Sign-Up to Gain Access", font=("Times New Roman", 10))
+        self.text_label = Label(master, text= "Please Sign-Up to Gain Access")
+        self.label_role = Label(master, text="Admin or User")
+        
+        #Radio button for admin/user
+        
+        #Stores role; automatically chooses user
+        self.role = IntVar(value=0) 
+        
+        self.role_user = Radiobutton(master, text="User", variable=self.role, value=0)
+        self.role_admin = Radiobutton(master, text="Admin", variable=self.role, value=1)
+
         
         self.entry_username = Entry(master)
         self.entry_password = Entry(master, show = "*")
@@ -96,16 +106,19 @@ class SignupWindow:
         
         self.button_signup = Button(master, text = "Create Account", command = self.signup)
         
-        self.text_label.place(x=60, y=12)
-        self.label_username.place(x=35, y=50)
-        self.label_password.place(x=35, y=80)
-        self.label_confirm.place(x=35, y=110)
+        self.text_label.place(x=100, y=12)
+        self.label_username.place(x=35, y=70)
+        self.label_password.place(x=35, y=100)
+        self.label_confirm.place(x=35, y=130)
+        self.label_role.place(x=35, y=45)
         
-        self.entry_username.place(x=150, y=50)
-        self.entry_password.place(x=150, y=80)
-        self.entry_confirm.place(x=150, y=110)
+        self.entry_username.place(x=150, y=70)
+        self.entry_password.place(x=150, y=100)
+        self.entry_confirm.place(x=150, y=130)
+        self.role_admin.place(x=150, y=45)
+        self.role_user.place(x=230, y=45)
         
-        self.button_signup.place(x=115, y=150)  
+        self.button_signup.place(x=145, y=160)  
 
         #Color
         self.master.configure(background="lightsteelblue1")
@@ -113,11 +126,15 @@ class SignupWindow:
         self.label_confirm.config(background="lightsteelblue1")
         self.label_password.config(background="lightsteelblue1")
         self.label_username.config(background="lightsteelblue1")
+        self.label_role.config(background="lightsteelblue1")
+        self.role_admin.config(background="lightsteelblue1")
+        self.role_user.config(background="lightsteelblue1")
         
     def signup(self):
         username = self.entry_username.get()
         password = self.entry_password.get()
         confirm = self.entry_confirm.get()
+        role_value = self.role.get()
         
         if password != confirm:
             messagebox.showerror("Error", "Passwords don't match!")
@@ -131,7 +148,7 @@ class SignupWindow:
         c = conn.cursor()
         
         try:
-            c.execute("INSERT INTO users VALUES (?, ?, 0)", (username, password))
+            c.execute("INSERT INTO users VALUES (?, ?, ?)", (username, password, role_value))
             conn.commit()
             messagebox.showinfo("Success", "Account created successfully!")
             self.master.destroy()
